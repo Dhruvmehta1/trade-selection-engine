@@ -1,6 +1,7 @@
 from data.data_loader import load_data
 from features.feature_engineering import create_features
 from strategies.momentum import momentum_strategy
+from ml.labeling import create_labels
 
 def run_pipeline():
     print("Starting pipeline...\n")
@@ -20,14 +21,22 @@ def run_pipeline():
     df = momentum_strategy(df)
     print("Success! Momentum breakout signals applied.")
     
+    # Phase 4: Label Generation
+    print("\n--- PHASE 4: Generating Labels ---")
+    df = create_labels(df)
+    print("Success! 5-day future returns and binary labels created.")
+    
     # Checkpoint Verification
     print("\n==========================================")
     print("        FINAL PIPELINE CHECKPOINT         ")
     print("==========================================")
-    print(df[['Close', '20_day_high', '20_day_low', 'Signal']].tail(15))
+    print(df[['Close', 'Signal', 'Future_Return_5d', 'Label']].tail(15))
     
     print("\nSignal Distribution (1 = Buy, -1 = Sell, 0 = Hold):")
     print(df['Signal'].value_counts())
+    
+    print("\nLabel Distribution (1 = Good Trade, 0 = Bad Trade):")
+    print(df['Label'].value_counts())
 
 # Run the whole system
 if __name__ == "__main__":

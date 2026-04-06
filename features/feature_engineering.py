@@ -29,4 +29,4 @@ if __name__ == '__main__':
     # Test block: only runs if this file is executed directly
     df = pd.read_csv('../data/spy_processed.csv', index_col='Date', parse_dates=True)
     df = create_features(df)
-    print(df.info())
+    print(df.tail())
