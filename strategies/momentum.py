@@ -1,34 +1,37 @@
 import sys
 import os
 import pandas as pd
-
+from features.feature_engineering import create_features
 # Add the parent directory (project root) to sys.path to fix ModuleNotFoundError
 # This allows Python to find the 'features' folder when running this script directly
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from features.feature_engineering import create_features
 
-def momentum_strategy(df):
+
+def momentum_strategy(df, window=20):
     """
     Applies the momentum breakout strategy to the DataFrame.
     """
-    # 1. Calculate the 20-day highest high and lowest low
-    # We use .shift(1) so today's Close is compared to the PREVIOUS 20 days.
+    # 1. Calculate the N-day highest high and lowest low
+    # We use .shift(1) so today's Close is compared to the PREVIOUS N days.
     # Without .shift(1), today's High would be included, making breakouts impossible.
-    df['20_day_high'] = df['High'].rolling(window=20).max().shift(1)
-    df['20_day_low'] = df['Low'].rolling(window=20).min().shift(1)
+    high_col = f'{window}_day_high'
+    low_col = f'{window}_day_low'
+    
+    df[high_col] = df['High'].rolling(window=window).max().shift(1)
+    df[low_col] = df['Low'].rolling(window=window).min().shift(1)
     
     # 2. Create the Signal column (default is 0: Hold)
     df['Signal'] = 0
     
     # 3. Generate BUY Signals (1)
-    buy_condition = df['Close'] > df['20_day_high']
+    buy_condition = df['Close'] > df[high_col]
     df.loc[buy_condition, 'Signal'] = 1
     
     # 4. Generate SELL Signals (-1)
-    sell_condition = df['Close'] < df['20_day_low']
+    sell_condition = df['Close'] < df[low_col]
     df.loc[sell_condition, 'Signal'] = -1    
     
     return df

@@ -3,6 +3,9 @@ from features.feature_engineering import create_features
 from strategies.momentum import momentum_strategy
 from ml.labeling import create_labels
 from ml.model import split_data, train_and_predict
+from backtest.engine import run_backtest
+from backtest.metrics import compare_strategies
+from evaluation.robustness import run_robustness_checks
 
 def run_pipeline():
     print("Starting pipeline...\n")
@@ -36,6 +39,15 @@ def run_pipeline():
     print("\n--- PHASE 6: ML Model Prediction ---")
     probs, ml_signals = train_and_predict(X_train, y_train, X_test, y_test)
     print("Success! Random Forest trained and trades filtered.")
+
+    # Phase 7: Backtest
+    backtest_df = run_backtest(df, X_test, ml_signals)
+
+    # Phase 8: Metrics
+    metrics_results = compare_strategies(backtest_df)
+
+    # Phase 9: Robustness Checks
+    run_robustness_checks()
 
     # Checkpoint Verification
     print("\n==========================================")
