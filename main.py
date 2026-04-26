@@ -2,6 +2,7 @@ from data.data_loader import load_data
 from features.feature_engineering import create_features
 from strategies.momentum import momentum_strategy
 from ml.labeling import create_labels
+from ml.model import split_data, train_and_predict
 
 def run_pipeline():
     print("Starting pipeline...\n")
@@ -26,6 +27,16 @@ def run_pipeline():
     df = create_labels(df)
     print("Success! 5-day future returns and binary labels created.")
     
+    # Phase 5: Split Data
+    print("\n--- PHASE 5: Splitting Data ---")
+    X_train, X_test, y_train, y_test = split_data(df)
+    print("Success! Data split into Train (70%) and Test (30%).")
+    
+    # Phase 6: Train Model & Predict
+    print("\n--- PHASE 6: ML Model Prediction ---")
+    probs, ml_signals = train_and_predict(X_train, y_train, X_test, y_test)
+    print("Success! Random Forest trained and trades filtered.")
+
     # Checkpoint Verification
     print("\n==========================================")
     print("        FINAL PIPELINE CHECKPOINT         ")
